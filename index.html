@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dziennik Elektroniczny - Librus Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .tab-btn { transition: all 0.2s; }
+        .tab-btn.active { border-bottom: 3px solid #10b981; color: #10b981; font-weight: 600; }
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; margin: 0; 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen p-4 sm:p-8">
+        <header class="mb-8 p-4 card flex justify-between items-center bg-teal-600 text-white">
+            <h1 class="text-3xl font-bold">🎓 Dziennik Librus</h1>
+            <div id="authStatus" class="text-sm rounded-full bg-teal-700 px-3 py-1">
+                Ładowanie...
+            </div>
+        </header>
+
+        <div id="loading" class="text-center p-10 text-gray-500 hidden">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500 inline-block"></div>
+            <p class="mt-2">Ładowanie danych...</p>
+        </div>
+
+        <div id="mainContent" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card p-5">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Wybierz Klasę</h2>
+                    <select id="classSelector" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 transition duration-150 bg-white shadow-sm">
+                        <option value="" disabled selected>--- Wybierz Klasę ---</option>
+                    </select>
+                    <div id="classInfo" class="mt-4 p-3 bg-teal-50 border-l-4 border-teal-500 text-sm text-teal-800 hidden rounded-md">
+                        <p>ID Użytkownika: <span id="userIdDisplay" class="font-mono text-xs text-teal-900 break-all"></span></p>
+                    </div>
+                </div>
+
+                <div class="card p-5">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Dodaj Nową Klasę</h2>
+                    <input type="text" id="newClassName" placeholder="Nazwa klasy (np. 8a)" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 mb-3">
+                    <button onclick="addClass()" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md">Dodaj Klasę</button>
+                </div>
+
+                <div id="subjectManager" class="card p-5 hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Przedmioty Klasy</h2>
+                    <div id="currentSubjects" class="mb-3 flex flex-wrap gap-2">
+                    </div>
+                    <input type="text" id="newSubjectName" placeholder="Nowy przedmiot (np. Chemia)" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 mb-3">
+                    <button onclick="addSubjectToClass()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md">Dodaj Przedmiot</button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 card p-6">
+                <div id="classDetails" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Dziennik Klasy: <span id="selectedClassNameDisplay"></span></h2>
+                    
+                    <div class="flex border-b border-gray-200 mb-4">
+                        <button id="tabStudents" onclick="showTab('students')" class="tab-btn py-2 px-4 text-gray-600 active">Lista Uczniów i Oceny</button>
+                        <button id="tabEntry" onclick="showTab('entry')" class="tab-btn py-2 px-4 text-gray-600">Wpisywanie Ocen/Uwag</button>
+                        <button id="tabReports" onclick="showTab('reports')" class="tab-btn py-2 px-4 text-gray-600">Raporty i Uwagi</button>
+                    </div>
+
+                    <div id="studentsTab" class="tab-content">
+                        <div class="flex justify-between items-center mb-4">
+                             <h3 class="text-xl font-semibold text-gray-700">Lista Uczniów</h3>
+                             <button onclick="openAddStudentModal()" class="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-1 px-3 rounded-full transition duration-150 shadow-sm">+ Dodaj Ucznia</button>
+                        </div>
+                        <div id="studentsList" class="overflow-x-auto">
+                        </div>
+                    </div>
+
+                    <div id="entryTab" class="tab-content hidden">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Wpisywanie Ocen i Uwag</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="p-4 card bg-gray-50 border border-gray-200">
+                                <h4 class="text-lg font-bold mb-3 text-teal-700">Wpisz Ocenę</h4>
+                                <select id="gradeStudentSelector" class="w-full p-2 border rounded-lg mb-3"></select>
+                                <select id="gradeSubjectSelector" class="w-full p-2 border rounded-lg mb-3"></select>
+                                
+                                <div class="flex gap-2 mb-3">
+                                    <input type="number" id="gradeValue" min="1" max="6" step="0.5" placeholder="Ocena (1-6)" class="w-1/3 p-2 border rounded-lg focus:ring-teal-500">
+                                    <select id="gradeCategory" class="w-2/3 p-2 border rounded-lg focus:ring-teal-500">
+                                        <option value="" disabled selected>--- Kategoria ---</option>
+                                        <option value="Kartkówka">Kartkówka</option>
+                                        <option value="Odpowiedź">Odpowiedź</option>
+                                        <option value="Praca Klasowa">Praca Klasowa</option>
+                                        <option value="Aktywność">Aktywność</option>
+                                        <option value="Zadanie">Zadanie</option>
+                                    </select>
+                                </div>
+                                <textarea id="gradeComment" placeholder="Opcjonalny komentarz" class="w-full p-2 border rounded-lg mb-3"></textarea>
+                                <button onclick="submitGrade()" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 rounded-lg transition duration-150">Zapisz Ocenę</button>
+                            </div>
+
+                            <div class="p-4 card bg-gray-50 border border-gray-200">
+                                <h4 class="text-lg font-bold mb-3 text-indigo-700">Wpisz Uwagę (Zachowanie)</h4>
+                                <select id="noteStudentSelector" class="w-full p-2 border rounded-lg mb-3"></select>
+                                <select id="noteType" class="w-full p-2 border rounded-lg mb-3">
+                                    <option value="positive">Pozytywna (np. "Aktywność na lekcji")</option>
+                                    <option value="negative">Negatywna (np. "Brak pracy domowej")</option>
+                                </select>
+                                <textarea id="noteContent" placeholder="Treść uwagi" class="w-full p-2 border rounded-lg mb-3"></textarea>
+                                <button onclick="submitNote()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 rounded-lg transition duration-150">Zapisz Uwagę</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="reportsTab" class="tab-content hidden">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Szczegółowy Dziennik i Uwagi</h3>
+                        <p class="text-sm text-gray-500 mb-4">Wybierz ucznia, aby zobaczyć jego pełną historię ocen i uwag.</p>
+
+                        <select id="reportStudentSelector" class="w-full md:w-1/2 p-2 border rounded-lg mb-4"></select>
+                        
+                        <div id="studentReportDetails" class="space-y-6">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addStudentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="card p-6 w-full max-w-sm">
+            <h3 class="text-xl font-bold mb-4">Dodaj Ucznia do Klasy</h3>
+            <input type="text" id="newStudentName" placeholder="Imię i Nazwisko (np. Anna Kowalska)" class="w-full p-2 border rounded-lg mb-4">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeAddStudentModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Anuluj</button>
+                <button onclick="addStudent()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Dodaj</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, addDoc, arrayUnion, 
+            serverTimestamp, setLogLevel 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        setLogLevel('Debug');
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOa8hKqTPvTiSfNsMVbR-bM7ihY7Puzr0",
+            authDomain: "dziennik-75ed6.firebaseapp.com",
+            projectId: "dziennik-75ed6",
+            storageBucket: "dziennik-75ed6.firebasestorage.app",
+            messagingSenderId: "521205924518",
+            appId: "1:521205924518:web:1f22f45ed6aeb7b6b5aa67",
+            measurementId: "G-72D41D7ETD"
+        };
+        const app = initializeApp(firebaseConfig);
+
+        const APP_ID = 'dziennik-librus-style'; 
+
+        let auth, db;
+        let userId = null;
+        let isAuthReady = false;
+        
+        let classes = {}; 
+        let selectedClassId = null;
+        
+        const authStatusEl = document.getElementById('authStatus');
+        const mainContentEl = document.getElementById('mainContent');
+        const loadingEl = document.getElementById('loading');
+        const classSelectorEl = document.getElementById('classSelector');
+        const selectedClassNameDisplayEl = document.getElementById('selectedClassNameDisplay');
+        const studentsListEl = document.getElementById('studentsList');
+        const subjectManagerEl = document.getElementById('subjectManager');
+        const classDetailsEl = document.getElementById('classDetails');
+        const currentSubjectsEl = document.getElementById('currentSubjects');
+
+        const gradeStudentSelectorEl = document.getElementById('gradeStudentSelector');
+        const gradeSubjectSelectorEl = document.getElementById('gradeSubjectSelector');
+        const noteStudentSelectorEl = document.getElementById('noteStudentSelector');
+        const reportStudentSelectorEl = document.getElementById('reportStudentSelector');
+        const studentReportDetailsEl = document.getElementById('studentReportDetails');
+
+        const initializeFirebase = async () => {
+            try {
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                loadingEl.classList.remove('hidden');
+
+                await new Promise(resolve => {
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            userId = user.uid;
+                            authStatusEl.textContent = `Zalogowany (ID: ${userId.substring(0, 8)}...)`;
+                            authStatusEl.classList.add('bg-green-600');
+                            document.getElementById('userIdDisplay').textContent = userId;
+                            document.getElementById('classInfo').classList.remove('hidden');
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                        isAuthReady = true;
+                        resolve();
+                    });
+                });
+
+                if (isAuthReady) {
+                    await setupDataListeners();
+                    loadingEl.classList.add('hidden');
+                    mainContentEl.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Błąd inicjalizacji Firebase:", error);
+                authStatusEl.textContent = `Błąd Autoryzacji`;
+                authStatusEl.classList.add('bg-red-600');
+            }
+        };
+
+        const getPublicCollectionPath = (collectionName) => 
+            `artifacts/${APP_ID}/public/data/${collectionName}`;
+
+        const setupDataListeners = async () => {
+            if (!isAuthReady || !userId) return;
+
+            const classesRef = collection(db, getPublicCollectionPath('classes'));
+            onSnapshot(classesRef, (snapshot) => {
+                const newClasses = {};
+                snapshot.forEach(doc => {
+                    newClasses[doc.id] = { id: doc.id, ...doc.data(), students: {} };
+                });
+                classes = newClasses;
+                
+                renderClassSelector();
+                
+                if (!selectedClassId || !classes[selectedClassId]) {
+                    selectedClassId = Object.keys(classes)[0] || null;
+                }
+
+                if (selectedClassId) {
+                    setupClassSubscribers(selectedClassId);
+                    renderClassDetails();
+                }
+            });
+        };
+
+        const setupClassSubscribers = (classId) => {
+            const studentsRef = collection(db, getPublicCollectionPath(`classes/${classId}/students`));
+            onSnapshot(studentsRef, (snapshot) => {
+                if (!classes[classId]) return;
+                classes[classId].students = {};
+                snapshot.forEach(doc => {
+                    classes[classId].students[doc.id] = { id: doc.id, ...doc.data(), grades: [], notes: [] };
+                });
+                setupStudentSubscribers(classId);
+            });
+        };
+
+        const setupStudentSubscribers = (classId) => {
+            if (!classes[classId]) return;
+            Object.values(classes[classId].students).forEach(student => {
+                
+                const gradesRef = collection(db, getPublicCollectionPath(`classes/${classId}/students/${student.id}/grades`));
+                onSnapshot(gradesRef, (snapshot) => {
+                    student.grades = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    student.grades.sort((a, b) => (b.date?.toMillis() || 0) - (a.date?.toMillis() || 0)); 
+                    renderStudentsList();
+                    renderEntrySelectors();
+                    renderReport();
+                });
+
+                const notesRef = collection(db, getPublicCollectionPath(`classes/${classId}/students/${student.id}/notes`));
+                onSnapshot(notesRef, (snapshot) => {
+                    student.notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    student.notes.sort((a, b) => (b.date?.toMillis() || 0) - (a.date?.toMillis() || 0)); 
+                    renderStudentsList();
+                    renderEntrySelectors();
+                    renderReport();
+                });
+            });
+            renderStudentsList(); 
+        }
+
+        window.addClass = async () => {
+            const name = document.getElementById('newClassName').value.trim();
+            if (!name) return alertModal("Podaj nazwę klasy!");
+
+            try {
+                const newClassRef = doc(collection(db, getPublicCollectionPath('classes')));
+                await setDoc(newClassRef, {
+                    name,
+                    subjects: ["Matematyka", "Język Polski", "Język Angielski"],
+                    createdAt: serverTimestamp(),
+                    createdBy: userId
+                });
+                document.getElementById('newClassName').value = '';
+                alertModal(`Klasa "${name}" została dodana!`, 'success');
+            } catch (error) {
+                console.error("Błąd dodawania klasy:", error);
+                alertModal("Wystąpił błąd podczas dodawania klasy.", 'error');
+            }
+        };
+
+        window.addSubjectToClass = async () => {
+            if (!selectedClassId) return alertModal("Najpierw wybierz klasę.");
+            const newSubjectName = document.getElementById('newSubjectName').value.trim();
+            if (!newSubjectName) return alertModal("Podaj nazwę przedmiotu!");
+
+            try {
+                const classRef = doc(db, getPublicCollectionPath('classes'), selectedClassId);
+                await updateDoc(classRef, {
+                    subjects: arrayUnion(newSubjectName)
+                });
+                document.getElementById('newSubjectName').value = '';
+                alertModal(`Przedmiot "${newSubjectName}" dodany do klasy.`, 'success');
+            } catch (error) {
+                console.error("Błąd dodawania przedmiotu:", error);
+                alertModal("Wystąpił błąd podczas dodawania przedmiotu.", 'error');
+            }
+        };
+
+        window.openAddStudentModal = () => {
+             document.getElementById('addStudentModal').classList.remove('hidden');
+        }
+        window.closeAddStudentModal = () => {
+             document.getElementById('addStudentModal').classList.add('hidden');
+        }
+
+        window.addStudent = async () => {
+            if (!selectedClassId) return alertModal("Najpierw wybierz klasę.");
+            const name = document.getElementById('newStudentName').value.trim();
+            if (!name) return alertModal("Podaj imię i nazwisko ucznia!");
+
+            try {
+                const studentsRef = collection(db, getPublicCollectionPath(`classes/${selectedClassId}/students`));
+                await addDoc(studentsRef, {
+                    name,
+                    createdAt: serverTimestamp(),
+                    createdBy: userId
+                });
+                document.getElementById('newStudentName').value = '';
+                closeAddStudentModal();
+                alertModal(`Uczeń "${name}" został dodany!`, 'success');
+            } catch (error) {
+                console.error("Błąd dodawania ucznia:", error);
+                alertModal("Wystąpił błąd podczas dodawania ucznia.", 'error');
+            }
+        };
+
+        window.submitGrade = async () => {
+            const studentId = gradeStudentSelectorEl.value;
+            const subject = gradeSubjectSelectorEl.value;
+            const score = parseFloat(document.getElementById('gradeValue').value);
+            const category = document.getElementById('gradeCategory').value;
+            const comment = document.getElementById('gradeComment').value.trim();
+
+            if (!studentId || !subject || isNaN(score) || score < 1 || score > 6 || !category) {
+                return alertModal("Wypełnij poprawnie wszystkie pola: Uczeń, Przedmiot, Ocena (1-6) i Kategoria.");
+            }
+
+            try {
+                const gradesRef = collection(db, getPublicCollectionPath(`classes/${selectedClassId}/students/${studentId}/grades`));
+                await addDoc(gradesRef, {
+                    score,
+                    subject,
+                    category,
+                    comment: comment || null,
+                    date: serverTimestamp(),
+                    teacherId: userId
+                });
+                
+                document.getElementById('gradeValue').value = '';
+                document.getElementById('gradeCategory').value = '';
+                document.getElementById('gradeComment').value = '';
+                alertModal("Ocena zapisana pomyślnie!", 'success');
+
+            } catch (error) {
+                console.error("Błąd zapisywania oceny:", error);
+                alertModal("Wystąpił błąd podczas zapisywania oceny.", 'error');
+            }
+        };
+
+        window.submitNote = async () => {
+            const studentId = noteStudentSelectorEl.value;
+            const type = document.getElementById('noteType').value;
+            const content = document.getElementById('noteContent').value.trim();
+
+            if (!studentId || !type || !content) {
+                return alertModal("Wypełnij pola: Uczeń, Typ Uwagi i Treść Uwagi.");
+            }
+
+            try {
+                const notesRef = collection(db, getPublicCollectionPath(`classes/${selectedClassId}/students/${studentId}/notes`));
+                await addDoc(notesRef, {
+                    type,
+                    content,
+                    date: serverTimestamp(),
+                    teacherId: userId
+                });
+                
+                document.getElementById('noteContent').value = '';
+                alertModal("Uwaga zapisana pomyślnie!", 'success');
+
+            } catch (error) {
+                console.error("Błąd zapisywania uwagi:", error);
+                alertModal("Wystąpił błąd podczas zapisywania uwagi.", 'error');
+            }
+        };
+
+        window.handleClassChange = (event) => {
+            const newClassId = event.target.value;
+            if (newClassId && newClassId !== selectedClassId) {
+                selectedClassId = newClassId;
+                setupClassSubscribers(selectedClassId);
+                renderClassDetails();
+            }
+        };
+
+        const renderClassSelector = () => {
+            classSelectorEl.innerHTML = '<option value="" disabled selected>--- Wybierz Klasę ---</option>';
+            const sortedClasses = Object.values(classes).sort((a, b) => a.name.localeCompare(b.name));
+            sortedClasses.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.id;
+                option.textContent = c.name;
+                if (c.id === selectedClassId) {
+                    option.selected = true;
+                }
+                classSelectorEl.appendChild(option);
+            });
+            classSelectorEl.onchange = window.handleClassChange;
+        };
+
+        const renderClassDetails = () => {
+            if (!selectedClassId || !classes[selectedClassId]) {
+                classDetailsEl.classList.add('hidden');
+                subjectManagerEl.classList.add('hidden');
+                return;
+            }
+
+            classDetailsEl.classList.remove('hidden');
+            subjectManagerEl.classList.remove('hidden');
+
+            const currentClass = classes[selectedClassId];
+            selectedClassNameDisplayEl.textContent = currentClass.name;
+            
+            currentSubjectsEl.innerHTML = currentClass.subjects.map(sub => 
+                `<span class="px-3 py-1 bg-teal-100 text-teal-700 text-sm font-medium rounded-full">${sub}</span>`
+            ).join('');
+
+            renderEntrySelectors();
+            
+            renderStudentsList();
+            renderReport();
+        };
+
+        const calculateAverage = (grades) => {
+            if (grades.length === 0) return 'Brak';
+            const sum = grades.reduce((acc, g) => acc + g.score, 0);
+            return (sum / grades.length).toFixed(2);
+        };
+        
+        const getSubjectGrades = (studentId, subject) => {
+            const currentClass = classes[selectedClassId];
+            const student = currentClass?.students[studentId];
+            if (!student) return [];
+            return student.grades.filter(g => g.subject === subject);
+        };
+
+        const renderStudentsList = () => {
+            if (!selectedClassId || !classes[selectedClassId]) return;
+
+            const currentClass = classes[selectedClassId];
+            const subjects = currentClass.subjects || [];
+            const students = Object.values(currentClass.students).sort((a, b) => a.name.localeCompare(b.name));
+
+            if (students.length === 0) {
+                studentsListEl.innerHTML = '<p class="text-gray-500 p-4">Brak uczniów w tej klasie. Dodaj pierwszego ucznia.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">Uczeń</th>
+                            ${subjects.map(sub => `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${sub}</th>`).join('')}
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Uwagi</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Średnia</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+            `;
+
+            students.forEach(student => {
+                let totalGrades = [];
+                let subjectCells = '';
+
+                subjects.forEach(subject => {
+                    const subjectGrades = getSubjectGrades(student.id, subject);
+                    totalGrades.push(...subjectGrades);
+                    const avg = calculateAverage(subjectGrades);
+                    
+                    const gradeMarks = subjectGrades.map(g => `<span title="${g.category}${g.comment ? ': ' + g.comment : ''}" class="inline-block px-2 py-0.5 m-0.5 text-xs font-semibold rounded-md bg-blue-100 text-blue-800">${g.score}</span>`).join('');
+                    
+                    subjectCells += `<td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${gradeMarks || '<span class="text-gray-400">---</span>'}</td>`;
+                });
+
+                const totalAvg = calculateAverage(totalGrades);
+                const posNotes = student.notes.filter(n => n.type === 'positive').length;
+                const negNotes = student.notes.filter(n => n.type === 'negative').length;
+                
+                html += `
+                    <tr>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">${student.name}</td>
+                        ${subjectCells}
+                        <td class="px-4 py-4 whitespace-nowrap text-center text-sm">
+                            <span class="text-green-600 font-bold" title="Pozytywne Uwagi">${posNotes}</span> / 
+                            <span class="text-red-600 font-bold" title="Negatywne Uwagi">${negNotes}</span>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-center text-sm font-bold text-teal-600">${totalAvg}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+            studentsListEl.innerHTML = html;
+        };
+
+        const renderEntrySelectors = () => {
+             if (!selectedClassId || !classes[selectedClassId]) return;
+            
+            const currentClass = classes[selectedClassId];
+            const subjects = currentClass.subjects || [];
+            const students = Object.values(currentClass.students).sort((a, b) => a.name.localeCompare(b.name));
+
+            const studentOptions = students.map(s => 
+                `<option value="${s.id}">${s.name}</option>`
+            ).join('');
+            
+            const subjectOptions = subjects.map(s => 
+                `<option value="${s}">${s}</option>`
+            ).join('');
+
+            [gradeStudentSelectorEl, noteStudentSelectorEl, reportStudentSelectorEl].forEach(selector => {
+                const selectedValue = selector.value;
+                selector.innerHTML = `<option value="" disabled ${!selectedValue ? 'selected' : ''}>--- Wybierz Ucznia ---</option>` + studentOptions;
+                if (selectedValue && students.find(s => s.id === selectedValue)) {
+                     selector.value = selectedValue;
+                }
+            });
+
+            gradeSubjectSelectorEl.innerHTML = `<option value="" disabled selected>--- Wybierz Przedmiot ---</option>` + subjectOptions;
+        };
+
+        window.renderReport = () => {
+            const studentId = reportStudentSelectorEl.value;
+            if (!studentId || !selectedClassId || !classes[selectedClassId]) {
+                studentReportDetailsEl.innerHTML = '<p class="text-gray-500 p-4">Wybierz ucznia, aby zobaczyć szczegóły.</p>';
+                return;
+            }
+
+            const currentClass = classes[selectedClassId];
+            const student = currentClass.students[studentId];
+
+            if (!student) return;
+
+            const gradesBySubject = student.grades.reduce((acc, grade) => {
+                acc[grade.subject] = acc[grade.subject] || [];
+                acc[grade.subject].push(grade);
+                return acc;
+            }, {});
+
+            let gradesHtml = '<div class="p-4 card bg-white border border-blue-200 shadow-sm"><h5 class="text-lg font-bold mb-3 text-blue-700">Oceny Szczegółowo</h5>';
+            
+            const sortedSubjects = Object.keys(gradesBySubject).sort();
+            if (sortedSubjects.length > 0) {
+                sortedSubjects.forEach(subject => {
+                    const subjectGrades = gradesBySubject[subject].sort((a, b) => (b.date?.toMillis() || 0) - (a.date?.toMillis() || 0));
+                    gradesHtml += `<h6 class="font-semibold text-blue-600 mt-4 mb-2">${subject} (Średnia: ${calculateAverage(subjectGrades)})</h6><ul class="space-y-2">`;
+                    subjectGrades.forEach(g => {
+                        const date = g.date ? new Date(g.date.toMillis()).toLocaleDateString('pl-PL') : 'N/A';
+                        gradesHtml += `
+                            <li class="p-3 bg-blue-50 rounded-md border-l-4 border-blue-300">
+                                <span class="text-xl font-extrabold text-blue-800 mr-2">${g.score}</span>
+                                <span class="text-sm text-gray-500 ml-2">(${g.category})</span>
+                                <p class="text-xs text-gray-500 mt-1">Data: ${date}</p>
+                                ${g.comment ? `<p class="text-xs italic text-blue-600 mt-1">Komentarz: ${g.comment}</p>` : ''}
+                            </li>
+                        `;
+                    });
+                    gradesHtml += '</ul>';
+                });
+            } else {
+                 gradesHtml += '<p class="text-gray-500">Brak ocen.</p>';
+            }
+            gradesHtml += '</div>';
+
+            let notesHtml = '<div class="p-4 card bg-white border border-indigo-200 shadow-sm"><h5 class="text-lg font-bold mb-3 text-indigo-700">Uwagi (Zachowanie)</h5><ul class="space-y-2">';
+            student.notes.sort((a, b) => (b.date?.toMillis() || 0) - (a.date?.toMillis() || 0)).forEach(n => {
+                const date = n.date ? new Date(n.date.toMillis()).toLocaleDateString('pl-PL') : 'N/A';
+                const color = n.type === 'positive' ? 'green' : 'red';
+                notesHtml += `
+                    <li class="p-3 bg-${color}-50 border-l-4 border-${color}-500 rounded-md">
+                        <span class="font-semibold text-${color}-800">${n.type === 'positive' ? 'Pozytywna' : 'Negatywna'}</span>
+                        <p class="text-sm mt-1">${n.content}</p>
+                        <p class="text-xs text-gray-500 mt-1">Data: ${date}</p>
+                    </li>
+                `;
+            });
+            notesHtml += student.notes.length === 0 ? '<p class="text-gray-500">Brak uwag.</p>' : '';
+            notesHtml += '</ul></div>';
+            
+            let html = `
+                <h4 class="text-xl font-bold mb-3 text-gray-800">Historia dla: ${student.name}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${gradesHtml}
+                    ${notesHtml}
+                </div>
+            `;
+
+            studentReportDetailsEl.innerHTML = html;
+        };
+
+        window.showTab = (tabName) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`${tabName}Tab`).classList.remove('hidden');
+            document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
+            
+            if (tabName === 'entry' || tabName === 'reports') {
+                renderEntrySelectors();
+                if (tabName === 'reports') {
+                    window.renderReport();
+                    reportStudentSelectorEl.onchange = window.renderReport;
+                }
+            }
+        };
+
+        const alertModal = (message, type = 'info') => {
+            const colors = {
+                info: 'bg-blue-500',
+                success: 'bg-green-500',
+                error: 'bg-red-500'
+            };
+            
+            let modal = document.getElementById('customAlert');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'customAlert';
+                modal.className = 'fixed top-4 right-4 z-[9999] p-4 text-white rounded-lg shadow-xl transition-opacity duration-300 opacity-0';
+                document.body.appendChild(modal);
+            }
+
+            modal.className = `fixed top-4 right-4 z-[9999] p-4 text-white rounded-lg shadow-xl transition-opacity duration-300 ${colors[type]}`;
+            modal.textContent = message;
+            
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            
+            setTimeout(() => modal.classList.add('opacity-0'), 3000);
+        };
+
+        initializeFirebase();
+    </script>
+</body>
+</html>
