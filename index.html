@@ -3,14 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dziennik Elektroniczny - Librus Style</title>
+    <title>Dziennik Elektroniczny - Glassmorphism</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
-        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .tab-btn { transition: all 0.2s; }
-        .tab-btn.active { border-bottom: 3px solid #10b981; color: #10b981; font-weight: 600; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            transition: all 0.3s ease-in-out;
+        }
+        .glass-card:hover {
+            box-shadow: 0 10px 40px 0 rgba(31, 38, 135, 0.25);
+        }
+        .header-bg {
+             background: linear-gradient(90deg, #1e3a8a 0%, #10b981 100%);
+        }
+        .tab-btn { 
+            transition: all 0.3s; 
+            padding: 0.8rem 1.25rem; 
+            border-radius: 1.5rem 1.5rem 0 0;
+            margin-right: 0.5rem;
+            font-weight: 500;
+        }
+        .tab-btn.active { 
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e3a8a;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.08);
+            border-bottom: 3px solid #1e3a8a;
+            font-weight: 600;
+        }
+        .input-style { 
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(30, 58, 138, 0.2); 
+            border-radius: 0.75rem;
+            transition: border-color 0.2s, box-shadow 0.2s; 
+        }
+        .input-style:focus { 
+            border-color: #10b981; 
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4); 
+            background: white;
+        }
+        .btn-primary { 
+            background: #10b981; 
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+            font-weight: 600;
+            border-radius: 0.75rem;
+        }
+        .btn-primary:hover { 
+            background: #059669; 
+        }
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { 
             -webkit-appearance: none; margin: 0; 
@@ -19,110 +69,124 @@
 </head>
 <body>
 
-    <div id="app" class="min-h-screen p-4 sm:p-8">
-        <header class="mb-8 p-4 card flex justify-between items-center bg-teal-600 text-white">
-            <h1 class="text-3xl font-bold">🎓 Dziennik Librus</h1>
-            <div id="authStatus" class="text-sm rounded-full bg-teal-700 px-3 py-1">
-                Ładowanie...
+    <div id="app" class="p-4 sm:p-10">
+        <header class="mb-10 p-5 header-bg text-white shadow-xl rounded-xl">
+            <div class="flex justify-between items-center max-w-7xl mx-auto">
+                <h1 class="text-3xl font-extrabold tracking-wider">L. Dziennik 🧪</h1>
+                <div id="authStatus" class="text-xs rounded-full bg-white bg-opacity-20 px-4 py-2 font-medium border border-white border-opacity-30">
+                    Ładowanie...
+                </div>
             </div>
         </header>
 
-        <div id="loading" class="text-center p-10 text-gray-500 hidden">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500 inline-block"></div>
-            <p class="mt-2">Ładowanie danych...</p>
+        <div id="loading" class="text-center p-16 text-gray-500 hidden glass-card max-w-lg mx-auto">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-3 border-gray-500 inline-block"></div>
+            <p class="mt-4 text-xl font-medium">Ładowanie danych...</p>
         </div>
 
-        <div id="mainContent" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div id="mainContent" class="hidden max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
             
             <div class="lg:col-span-1 space-y-6">
-                <div class="card p-5">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Wybierz Klasę</h2>
-                    <select id="classSelector" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 transition duration-150 bg-white shadow-sm">
+                <!-- Panel Zarządzania -->
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2 border-gray-200">Panel Zarządzania</h2>
+                    <select id="classSelector" class="input-style w-full p-3 border focus:ring-emerald-500 transition duration-150 shadow-sm text-gray-700">
                         <option value="" disabled selected>--- Wybierz Klasę ---</option>
                     </select>
-                    <div id="classInfo" class="mt-4 p-3 bg-teal-50 border-l-4 border-teal-500 text-sm text-teal-800 hidden rounded-md">
-                        <p>ID Użytkownika: <span id="userIdDisplay" class="font-mono text-xs text-teal-900 break-all"></span></p>
+                    <div id="classInfo" class="mt-4 p-4 bg-white bg-opacity-70 border-l-4 border-indigo-500 text-sm text-gray-700 hidden rounded-lg">
+                        <p>ID Nauczyciela: <span id="userIdDisplay" class="font-mono text-xs text-gray-800 break-all"></span></p>
                     </div>
                 </div>
 
-                <div class="card p-5">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Dodaj Nową Klasę</h2>
-                    <input type="text" id="newClassName" placeholder="Nazwa klasy (np. 8a)" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 mb-3">
-                    <button onclick="addClass()" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md">Dodaj Klasę</button>
+                <!-- Dodaj Nową Klasę -->
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Utwórz Klasę</h2>
+                    <input type="text" id="newClassName" placeholder="Nazwa klasy (np. 8a)" class="input-style w-full p-3 border mb-4">
+                    <button onclick="addClass()" class="w-full btn-primary text-white py-3 px-4 transition duration-150 hover:shadow-xl">Utwórz Klasę</button>
                 </div>
 
-                <div id="subjectManager" class="card p-5 hidden">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Przedmioty Klasy</h2>
-                    <div id="currentSubjects" class="mb-3 flex flex-wrap gap-2">
+                <!-- Edytuj Przedmioty -->
+                <div id="subjectManager" class="glass-card p-6 hidden">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Przedmioty Klasy</h2>
+                    <div id="currentSubjects" class="mb-4 flex flex-wrap gap-2">
                     </div>
-                    <input type="text" id="newSubjectName" placeholder="Nowy przedmiot (np. Chemia)" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 mb-3">
-                    <button onclick="addSubjectToClass()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md">Dodaj Przedmiot</button>
+                    <input type="text" id="newSubjectName" placeholder="Nowy przedmiot (np. Chemia)" class="input-style w-full p-3 border mb-4">
+                    <button onclick="addSubjectToClass()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition duration-150 hover:shadow-xl">Dodaj Przedmiot</button>
                 </div>
             </div>
 
-            <div class="lg:col-span-3 card p-6">
+            <div class="lg:col-span-3">
                 <div id="classDetails" class="hidden">
-                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Dziennik Klasy: <span id="selectedClassNameDisplay"></span></h2>
+                    <h2 class="text-4xl font-extrabold mb-6 text-gray-800">Klasa: <span id="selectedClassNameDisplay" class="text-indigo-600"></span></h2>
                     
-                    <div class="flex border-b border-gray-200 mb-4">
-                        <button id="tabStudents" onclick="showTab('students')" class="tab-btn py-2 px-4 text-gray-600 active">Lista Uczniów i Oceny</button>
-                        <button id="tabEntry" onclick="showTab('entry')" class="tab-btn py-2 px-4 text-gray-600">Wpisywanie Ocen/Uwag</button>
-                        <button id="tabReports" onclick="showTab('reports')" class="tab-btn py-2 px-4 text-gray-600">Raporty i Uwagi</button>
+                    <!-- Tabs -->
+                    <div class="flex border-b-2 border-gray-200 mb-6">
+                        <button id="tabStudents" onclick="showTab('students')" class="tab-btn text-gray-600 active">Lista Uczniów</button>
+                        <button id="tabEntry" onclick="showTab('entry')" class="tab-btn text-gray-600">Wpisywanie Danych</button>
+                        <button id="tabReports" onclick="showTab('reports')" class="tab-btn text-gray-600">Raporty</button>
                     </div>
 
-                    <div id="studentsTab" class="tab-content">
-                        <div class="flex justify-between items-center mb-4">
-                             <h3 class="text-xl font-semibold text-gray-700">Lista Uczniów</h3>
-                             <button onclick="openAddStudentModal()" class="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-1 px-3 rounded-full transition duration-150 shadow-sm">+ Dodaj Ucznia</button>
+                    <div class="glass-card p-8 min-h-[600px]">
+                        <!-- Students Tab -->
+                        <div id="studentsTab" class="tab-content">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-2xl font-bold text-gray-700">Przegląd Ocen</h3>
+                                <button onclick="openAddStudentModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold py-2.5 px-5 rounded-full transition duration-150 shadow-md flex items-center transform hover:scale-[1.02]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                                    Dodaj Ucznia
+                                </button>
+                            </div>
+                            <div id="studentsList" class="overflow-x-auto">
+                            </div>
                         </div>
-                        <div id="studentsList" class="overflow-x-auto">
-                        </div>
-                    </div>
 
-                    <div id="entryTab" class="tab-content hidden">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Wpisywanie Ocen i Uwag</h3>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="p-4 card bg-gray-50 border border-gray-200">
-                                <h4 class="text-lg font-bold mb-3 text-teal-700">Wpisz Ocenę</h4>
-                                <select id="gradeStudentSelector" class="w-full p-2 border rounded-lg mb-3"></select>
-                                <select id="gradeSubjectSelector" class="w-full p-2 border rounded-lg mb-3"></select>
-                                
-                                <div class="flex gap-2 mb-3">
-                                    <input type="number" id="gradeValue" min="1" max="6" step="0.5" placeholder="Ocena (1-6)" class="w-1/3 p-2 border rounded-lg focus:ring-teal-500">
-                                    <select id="gradeCategory" class="w-2/3 p-2 border rounded-lg focus:ring-teal-500">
-                                        <option value="" disabled selected>--- Kategoria ---</option>
-                                        <option value="Kartkówka">Kartkówka</option>
-                                        <option value="Odpowiedź">Odpowiedź</option>
-                                        <option value="Praca Klasowa">Praca Klasowa</option>
-                                        <option value="Aktywność">Aktywność</option>
-                                        <option value="Zadanie">Zadanie</option>
-                                    </select>
+                        <!-- Entry Tab -->
+                        <div id="entryTab" class="tab-content hidden">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">Wpisywanie Ocen i Uwag</h3>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                <div class="p-6 glass-card border border-emerald-400 bg-emerald-50 bg-opacity-70">
+                                    <h4 class="text-xl font-bold mb-4 text-emerald-700">Wpisz Ocenę 📝</h4>
+                                    <select id="gradeStudentSelector" class="input-style w-full p-3 border mb-3"></select>
+                                    <select id="gradeSubjectSelector" class="input-style w-full p-3 border mb-3"></select>
+                                    
+                                    <div class="flex gap-4 mb-4">
+                                        <input type="number" id="gradeValue" min="1" max="6" step="0.5" placeholder="Ocena (1-6)" class="input-style w-1/3 p-3 border text-center">
+                                        <select id="gradeCategory" class="input-style w-2/3 p-3 border">
+                                            <option value="" disabled selected>--- Kategoria ---</option>
+                                            <option value="Kartkówka">Kartkówka</option>
+                                            <option value="Odpowiedź">Odpowiedź</option>
+                                            <option value="Praca Klasowa">Praca Klasowa</option>
+                                            <option value="Aktywność">Aktywność</option>
+                                            <option value="Zadanie">Zadanie</option>
+                                        </select>
+                                    </div>
+                                    <textarea id="gradeComment" placeholder="Opcjonalny komentarz..." class="input-style w-full p-3 border mb-4 h-24 resize-none"></textarea>
+                                    <button onclick="submitGrade()" class="w-full btn-primary text-white py-3 transition duration-150 hover:shadow-xl">Zapisz Ocenę</button>
                                 </div>
-                                <textarea id="gradeComment" placeholder="Opcjonalny komentarz" class="w-full p-2 border rounded-lg mb-3"></textarea>
-                                <button onclick="submitGrade()" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 rounded-lg transition duration-150">Zapisz Ocenę</button>
-                            </div>
 
-                            <div class="p-4 card bg-gray-50 border border-gray-200">
-                                <h4 class="text-lg font-bold mb-3 text-indigo-700">Wpisz Uwagę (Zachowanie)</h4>
-                                <select id="noteStudentSelector" class="w-full p-2 border rounded-lg mb-3"></select>
-                                <select id="noteType" class="w-full p-2 border rounded-lg mb-3">
-                                    <option value="positive">Pozytywna (np. "Aktywność na lekcji")</option>
-                                    <option value="negative">Negatywna (np. "Brak pracy domowej")</option>
-                                </select>
-                                <textarea id="noteContent" placeholder="Treść uwagi" class="w-full p-2 border rounded-lg mb-3"></textarea>
-                                <button onclick="submitNote()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 rounded-lg transition duration-150">Zapisz Uwagę</button>
+                                <div class="p-6 glass-card border border-indigo-400 bg-indigo-50 bg-opacity-70">
+                                    <h4 class="text-xl font-bold mb-4 text-indigo-700">Wpisz Uwagę 🔔</h4>
+                                    <select id="noteStudentSelector" class="input-style w-full p-3 border mb-3"></select>
+                                    <select id="noteType" class="input-style w-full p-3 border mb-3">
+                                        <option value="positive">Pozytywna (np. "Aktywność na lekcji")</option>
+                                        <option value="negative">Negatywna (np. "Brak pracy domowej")</option>
+                                    </select>
+                                    <textarea id="noteContent" placeholder="Treść uwagi" class="input-style w-full p-3 border mb-4 h-24 resize-none"></textarea>
+                                    <button onclick="submitNote()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition duration-150 hover:shadow-xl">Zapisz Uwagę</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div id="reportsTab" class="tab-content hidden">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Szczegółowy Dziennik i Uwagi</h3>
-                        <p class="text-sm text-gray-500 mb-4">Wybierz ucznia, aby zobaczyć jego pełną historię ocen i uwag.</p>
+                        <!-- Reports Tab -->
+                        <div id="reportsTab" class="tab-content hidden">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">Raporty i Historia Ucznia</h3>
+                            <p class="text-gray-500 mb-6">Wybierz ucznia, aby zobaczyć jego pełną historię.</p>
 
-                        <select id="reportStudentSelector" class="w-full md:w-1/2 p-2 border rounded-lg mb-4"></select>
-                        
-                        <div id="studentReportDetails" class="space-y-6">
+                            <select id="reportStudentSelector" class="input-style w-full md:w-1/2 p-3 border mb-8"></select>
+                            
+                            <div id="studentReportDetails" class="space-y-10">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -130,13 +194,14 @@
         </div>
     </div>
 
-    <div id="addStudentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="card p-6 w-full max-w-sm">
-            <h3 class="text-xl font-bold mb-4">Dodaj Ucznia do Klasy</h3>
-            <input type="text" id="newStudentName" placeholder="Imię i Nazwisko (np. Anna Kowalska)" class="w-full p-2 border rounded-lg mb-4">
-            <div class="flex justify-end gap-2">
-                <button onclick="closeAddStudentModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Anuluj</button>
-                <button onclick="addStudent()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Dodaj</button>
+    <!-- Modal for adding student -->
+    <div id="addStudentModal" class="fixed inset-0 bg-gray-900 bg-opacity-40 flex items-center justify-center hidden z-50 transition-opacity duration-300">
+        <div class="glass-card p-8 w-full max-w-md transform transition-all duration-300 scale-95 opacity-0" id="studentModalContent">
+            <h3 class="text-2xl font-bold mb-5 text-gray-800">Dodaj Nowego Ucznia</h3>
+            <input type="text" id="newStudentName" placeholder="Imię i Nazwisko (np. Anna Kowalska)" class="input-style w-full p-4 border mb-6">
+            <div class="flex justify-end gap-3">
+                <button onclick="closeAddStudentModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-xl transition duration-150">Anuluj</button>
+                <button onclick="addStudent()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-xl transition duration-150">Dodaj</button>
             </div>
         </div>
     </div>
@@ -186,6 +251,8 @@
         const noteStudentSelectorEl = document.getElementById('noteStudentSelector');
         const reportStudentSelectorEl = document.getElementById('reportStudentSelector');
         const studentReportDetailsEl = document.getElementById('studentReportDetails');
+        const modalEl = document.getElementById('addStudentModal');
+        const modalContentEl = document.getElementById('studentModalContent');
 
         const initializeFirebase = async () => {
             try {
@@ -199,7 +266,7 @@
                         if (user) {
                             userId = user.uid;
                             authStatusEl.textContent = `Zalogowany (ID: ${userId.substring(0, 8)}...)`;
-                            authStatusEl.classList.add('bg-green-600');
+                            authStatusEl.classList.add('bg-white', 'bg-opacity-30');
                             document.getElementById('userIdDisplay').textContent = userId;
                             document.getElementById('classInfo').classList.remove('hidden');
                         } else {
@@ -218,7 +285,8 @@
             } catch (error) {
                 console.error("Błąd inicjalizacji Firebase:", error);
                 authStatusEl.textContent = `Błąd Autoryzacji`;
-                authStatusEl.classList.add('bg-red-600');
+                authStatusEl.classList.remove('bg-white');
+                authStatusEl.classList.add('bg-red-500');
             }
         };
 
@@ -325,10 +393,19 @@
         };
 
         window.openAddStudentModal = () => {
-             document.getElementById('addStudentModal').classList.remove('hidden');
+             modalEl.classList.remove('hidden');
+             setTimeout(() => {
+                modalEl.classList.add('opacity-100');
+                modalContentEl.classList.remove('scale-95', 'opacity-0');
+                modalContentEl.classList.add('scale-100', 'opacity-100');
+             }, 10);
         }
         window.closeAddStudentModal = () => {
-             document.getElementById('addStudentModal').classList.add('hidden');
+             modalContentEl.classList.remove('scale-100', 'opacity-100');
+             modalContentEl.classList.add('scale-95', 'opacity-0');
+             setTimeout(() => {
+                modalEl.classList.add('hidden');
+             }, 300);
         }
 
         window.addStudent = async () => {
@@ -450,7 +527,7 @@
             selectedClassNameDisplayEl.textContent = currentClass.name;
             
             currentSubjectsEl.innerHTML = currentClass.subjects.map(sub => 
-                `<span class="px-3 py-1 bg-teal-100 text-teal-700 text-sm font-medium rounded-full">${sub}</span>`
+                `<span class="px-3 py-1 bg-white glass-card border-emerald-400 border text-emerald-700 text-sm font-medium rounded-full">${sub}</span>`
             ).join('');
 
             renderEntrySelectors();
@@ -485,16 +562,16 @@
             }
 
             let html = `
-                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-2xl overflow-hidden glass-card">
+                    <thead class="bg-indigo-50 bg-opacity-70">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">Uczeń</th>
-                            ${subjects.map(sub => `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${sub}</th>`).join('')}
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Uwagi</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Średnia</th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider sticky left-0 bg-indigo-50 bg-opacity-70 rounded-tl-2xl">Uczeń</th>
+                            ${subjects.map(sub => `<th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${sub}</th>`).join('')}
+                            <th class="px-4 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Uwagi</th>
+                            <th class="px-4 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider rounded-tr-2xl">Średnia</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-200">
             `;
 
             students.forEach(student => {
@@ -506,9 +583,9 @@
                     totalGrades.push(...subjectGrades);
                     const avg = calculateAverage(subjectGrades);
                     
-                    const gradeMarks = subjectGrades.map(g => `<span title="${g.category}${g.comment ? ': ' + g.comment : ''}" class="inline-block px-2 py-0.5 m-0.5 text-xs font-semibold rounded-md bg-blue-100 text-blue-800">${g.score}</span>`).join('');
+                    const gradeMarks = subjectGrades.map(g => `<span title="${g.category}${g.comment ? ': ' + g.comment : ''}" class="inline-block px-2 py-0.5 m-0.5 text-xs font-semibold rounded-full ${g.score >= 4.5 ? 'bg-yellow-400 text-gray-800' : 'bg-blue-400 text-white'}">${g.score}</span>`).join('');
                     
-                    subjectCells += `<td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${gradeMarks || '<span class="text-gray-400">---</span>'}</td>`;
+                    subjectCells += `<td class="px-4 py-4 text-sm text-gray-900">${gradeMarks || '<span class="text-gray-400">---</span>'}</td>`;
                 });
 
                 const totalAvg = calculateAverage(totalGrades);
@@ -516,14 +593,14 @@
                 const negNotes = student.notes.filter(n => n.type === 'negative').length;
                 
                 html += `
-                    <tr>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">${student.name}</td>
+                    <tr class="hover:bg-gray-100 transition duration-150">
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 sticky left-0 glass-card">${student.name}</td>
                         ${subjectCells}
                         <td class="px-4 py-4 whitespace-nowrap text-center text-sm">
-                            <span class="text-green-600 font-bold" title="Pozytywne Uwagi">${posNotes}</span> / 
+                            <span class="text-emerald-600 font-bold" title="Pozytywne Uwagi">${posNotes}</span> / 
                             <span class="text-red-600 font-bold" title="Negatywne Uwagi">${negNotes}</span>
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-center text-sm font-bold text-teal-600">${totalAvg}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-center text-sm font-bold text-indigo-600">${totalAvg}</td>
                     </tr>
                 `;
             });
@@ -579,49 +656,54 @@
                 return acc;
             }, {});
 
-            let gradesHtml = '<div class="p-4 card bg-white border border-blue-200 shadow-sm"><h5 class="text-lg font-bold mb-3 text-blue-700">Oceny Szczegółowo</h5>';
+            let gradesHtml = '<div class="p-6 glass-card border border-emerald-400 bg-emerald-50 bg-opacity-70 shadow-lg"><h5 class="text-2xl font-bold mb-4 text-emerald-800 border-b pb-2">Historia Ocen</h5>';
             
             const sortedSubjects = Object.keys(gradesBySubject).sort();
             if (sortedSubjects.length > 0) {
                 sortedSubjects.forEach(subject => {
                     const subjectGrades = gradesBySubject[subject].sort((a, b) => (b.date?.toMillis() || 0) - (a.date?.toMillis() || 0));
-                    gradesHtml += `<h6 class="font-semibold text-blue-600 mt-4 mb-2">${subject} (Średnia: ${calculateAverage(subjectGrades)})</h6><ul class="space-y-2">`;
+                    gradesHtml += `<h6 class="font-bold text-emerald-600 mt-5 mb-3 text-lg">${subject} <span class="text-sm font-medium text-gray-600">(Średnia: ${calculateAverage(subjectGrades)})</span></h6><div class="space-y-3">`;
                     subjectGrades.forEach(g => {
                         const date = g.date ? new Date(g.date.toMillis()).toLocaleDateString('pl-PL') : 'N/A';
                         gradesHtml += `
-                            <li class="p-3 bg-blue-50 rounded-md border-l-4 border-blue-300">
-                                <span class="text-xl font-extrabold text-blue-800 mr-2">${g.score}</span>
-                                <span class="text-sm text-gray-500 ml-2">(${g.category})</span>
+                            <div class="p-4 bg-white rounded-xl border-l-4 border-emerald-500 flex justify-between items-start shadow-sm">
+                                <div>
+                                    <span class="text-3xl font-extrabold text-emerald-800 mr-3">${g.score}</span>
+                                    <span class="text-sm font-medium text-gray-700">(${g.category})</span>
+                                    ${g.comment ? `<p class="text-xs italic text-gray-600 mt-1">Komentarz: ${g.comment}</p>` : ''}
+                                </div>
                                 <p class="text-xs text-gray-500 mt-1">Data: ${date}</p>
-                                ${g.comment ? `<p class="text-xs italic text-blue-600 mt-1">Komentarz: ${g.comment}</p>` : ''}
-                            </li>
+                            </div>
                         `;
                     });
-                    gradesHtml += '</ul>';
+                    gradesHtml += '</div>';
                 });
             } else {
-                 gradesHtml += '<p class="text-gray-500">Brak ocen.</p>';
+                 gradesHtml += '<p class="text-gray-500 p-4">Brak ocen.</p>';
             }
             gradesHtml += '</div>';
 
-            let notesHtml = '<div class="p-4 card bg-white border border-indigo-200 shadow-sm"><h5 class="text-lg font-bold mb-3 text-indigo-700">Uwagi (Zachowanie)</h5><ul class="space-y-2">';
+            let notesHtml = '<div class="p-6 glass-card border border-indigo-400 bg-indigo-50 bg-opacity-70 shadow-lg"><h5 class="text-2xl font-bold mb-4 text-indigo-800 border-b pb-2">Historia Uwag</h5><div class="space-y-3">';
             student.notes.sort((a, b) => (b.date?.toMillis() || 0) - (a.date?.toMillis() || 0)).forEach(n => {
                 const date = n.date ? new Date(n.date.toMillis()).toLocaleDateString('pl-PL') : 'N/A';
-                const color = n.type === 'positive' ? 'green' : 'red';
+                const color = n.type === 'positive' ? 'emerald' : 'red';
+                const icon = n.type === 'positive' ? '✅' : '❌';
                 notesHtml += `
-                    <li class="p-3 bg-${color}-50 border-l-4 border-${color}-500 rounded-md">
-                        <span class="font-semibold text-${color}-800">${n.type === 'positive' ? 'Pozytywna' : 'Negatywna'}</span>
-                        <p class="text-sm mt-1">${n.content}</p>
-                        <p class="text-xs text-gray-500 mt-1">Data: ${date}</p>
-                    </li>
+                    <div class="p-4 bg-white border-l-4 border-${color}-500 rounded-xl flex items-start justify-between shadow-sm">
+                        <div>
+                            <span class="font-semibold text-${color}-800">${icon} ${n.type === 'positive' ? 'Pozytywna' : 'Negatywna'}</span>
+                            <p class="text-sm mt-1 text-gray-700">${n.content}</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1 whitespace-nowrap">Data: ${date}</p>
+                    </div>
                 `;
             });
-            notesHtml += student.notes.length === 0 ? '<p class="text-gray-500">Brak uwag.</p>' : '';
-            notesHtml += '</ul></div>';
+            notesHtml += student.notes.length === 0 ? '<p class="text-gray-500 p-4">Brak uwag.</p>' : '';
+            notesHtml += '</div></div>';
             
             let html = `
-                <h4 class="text-xl font-bold mb-3 text-gray-800">Historia dla: ${student.name}</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h4 class="text-3xl font-bold mb-8 text-gray-800 border-b-2 border-indigo-500 pb-2">${student.name}</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     ${gradesHtml}
                     ${notesHtml}
                 </div>
@@ -632,10 +714,15 @@
 
         window.showTab = (tabName) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                 el.classList.remove('active', 'bg-white', 'text-indigo-600', 'text-gray-800');
+                 el.classList.add('bg-transparent', 'text-gray-600');
+            });
 
             document.getElementById(`${tabName}Tab`).classList.remove('hidden');
-            document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
+            const activeBtn = document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+            activeBtn.classList.add('active', 'text-indigo-600');
+            activeBtn.classList.remove('bg-transparent', 'text-gray-600');
             
             if (tabName === 'entry' || tabName === 'reports') {
                 renderEntrySelectors();
@@ -645,28 +732,34 @@
                 }
             }
         };
+        
+        window.onload = () => {
+            showTab('students');
+        };
 
         const alertModal = (message, type = 'info') => {
             const colors = {
-                info: 'bg-blue-500',
-                success: 'bg-green-500',
-                error: 'bg-red-500'
+                info: 'bg-blue-600',
+                success: 'bg-emerald-600',
+                error: 'bg-red-600'
             };
             
             let modal = document.getElementById('customAlert');
             if (!modal) {
                 modal = document.createElement('div');
                 modal.id = 'customAlert';
-                modal.className = 'fixed top-4 right-4 z-[9999] p-4 text-white rounded-lg shadow-xl transition-opacity duration-300 opacity-0';
+                modal.className = 'fixed top-6 right-6 z-[9999] p-4 text-white rounded-xl shadow-2xl transition-all duration-300 opacity-0 transform translate-y-4';
                 document.body.appendChild(modal);
             }
 
-            modal.className = `fixed top-4 right-4 z-[9999] p-4 text-white rounded-lg shadow-xl transition-opacity duration-300 ${colors[type]}`;
+            modal.className = `fixed top-6 right-6 z-[9999] p-4 text-white rounded-xl shadow-2xl transition-all duration-300 ${colors[type]}`;
             modal.textContent = message;
             
-            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            setTimeout(() => modal.classList.remove('opacity-0', 'translate-y-4'), 10);
             
-            setTimeout(() => modal.classList.add('opacity-0'), 3000);
+            setTimeout(() => {
+                 modal.classList.add('opacity-0', 'translate-y-4');
+            }, 3000);
         };
 
         initializeFirebase();
